@@ -23,7 +23,7 @@ module Ahoy
       if secure_compare(params[:signature], signature)
         redirect_to url
       else
-        redirect_to main_app.root_url
+        redirect_to AhoyEmail.options[:signature_fail_url] || main_app.root_url
       end
     end
 
