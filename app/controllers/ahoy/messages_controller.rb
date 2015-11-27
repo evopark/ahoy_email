@@ -8,7 +8,7 @@ module Ahoy
         @message.save!
       end
       publish :open
-      send_data Base64.decode64("R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="), type: "image/gif", disposition: "inline"
+      send_data Base64.decode64('R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='.freeze), type: 'image/gif', disposition: 'inline'
     end
 
     def click
@@ -18,9 +18,9 @@ module Ahoy
         @message.save!
       end
       url = params[:url].to_s
-      signature = OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha256"), AhoyEmail.secret_token, url)
+      signature = OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha256'), AhoyEmail.secret_token, url)
       publish :click, url: params[:url]
-      if secure_compare(params[:signature], signature)
+      if params[:signature] && secure_compare(params[:signature], signature)
         redirect_to url
       else
         redirect_to AhoyEmail.options[:signature_fail_url] || main_app.root_url
