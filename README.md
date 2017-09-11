@@ -14,6 +14,8 @@ Works with any email service.
 
 :fire: To track visits and events, check out [Ahoy](https://github.com/ankane/ahoy)
 
+[![Build Status](https://travis-ci.org/ankane/ahoy_email.svg?branch=master)](https://travis-ci.org/ankane/ahoy_email)
+
 ## Installation
 
 Add this line to your application’s Gemfile:
@@ -79,7 +81,7 @@ Use `track open: false` to skip this.
 
 A redirect is added to links to track clicks in HTML emails.
 
-````
+```
 http://chartkick.com
 ```
 
@@ -116,7 +118,17 @@ Use `track utm_params: false` to skip tagging, or skip specific links with:
 
 ### Extra Attributes
 
-Create a migration to add extra attributes to the `ahoy_messages` table and use:
+Create a migration to add extra attributes to the `ahoy_messages` table, for example:
+
+```ruby
+class AddCampaignIdToAhoyMessages < ActiveRecord::Migration
+  def change
+    add_column :ahoy_messages, :campaign_id, :integer
+  end
+end
+```
+
+Then use:
 
 ```ruby
 track extra: {campaign_id: 1}
@@ -169,19 +181,29 @@ Subscribe to open and click events. Create an initializer `config/initializers/a
 
 ```ruby
 class EmailSubscriber
-
   def open(event)
-    # :message and :controller keys
-    ahoy = event[:controller].ahoy
-    ahoy.track "Email opened", message_id: event[:message].id
+    # any code you want
   end
 
   def click(event)
-    # same keys as above, plus :url
-    ahoy = event[:controller].ahoy
-    ahoy.track "Email clicked", message_id: event[:message].id, url: event[:url]
+    # any code you want
+  end
+end
+
+AhoyEmail.subscribers << EmailSubscriber.new
+```
+
+Here’s an example if you use [Ahoy](https://github.com/ankane/ahoy) to track visits and events:
+
+```ruby
+class EmailSubscriber
+  def open(event)
+    event[:controller].ahoy.track "Email opened", message_id: event[:message].id
   end
 
+  def click(event)
+    event[:controller].ahoy.track "Email clicked", message_id: event[:message].id, url: event[:url]
+  end
 end
 
 AhoyEmail.subscribers << EmailSubscriber.new
@@ -192,7 +214,7 @@ AhoyEmail.subscribers << EmailSubscriber.new
 You can use a `Proc` for any option.
 
 ```ruby
-track utm_campaign: proc{|message, mailer| mailer.action_name + Time.now.year }
+track utm_campaign: proc { |message, mailer| mailer.action_name + Time.now.year }
 ```
 
 Disable tracking for an email
